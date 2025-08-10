@@ -7,7 +7,7 @@ function validate(input) {
           'link', 'section', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
        'address', 'main', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul',
         'li', 'dl', 'dt', 'dd', 'figure', 'figcaption', 'div', 'a', 'em', 'strong', 'small',
-        's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var', 'samp', 'kbd',
+        's', 'cite', 'q', 'dfn', 'abbr', 'data', 'time', 'code', 'var',
         'sub', 'sup', 'i', 'b', 'u', 'mark','span', 'br', 'img', 'video', 'audio', 'table',
         'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'form',
         'legend', 'label'

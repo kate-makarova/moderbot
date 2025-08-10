@@ -3,18 +3,15 @@
     <div id="moderbot-profile-update-preview">
         <div class="post-author">
             <ul>
-                <li class="pa-author"><span class="acchide">Автор:&nbsp;</span><a rel="nofollow">Helen Magnus</a></li>
-                <li class="pa-title">The Show Must Go On</li>
+                <li class="pa-author"><span class="acchide">Автор:&nbsp;</span><a data-id="username" rel="nofollow"></a></li>
+                <li data-id="title" class="pa-title"></li>
                 <li class="pa-avatar item2 offline"><span class="indOffline"><img src="/i/blank.gif"
-                                                                                  class="offline-icon"></span><img
-                        src="https://forumavatars.ru/img/avatars/0015/e5/b7/3132-1750779518.jpg" alt="Helen Magnus">
+                                                                                  class="offline-icon"></span>
+                    <img data-id="avatar" src="">
                 </li>
-                <li class="pa-fld1"><a href="https://crossfeeling.rusff.me/viewtopic.php?id=8663">ХЕЛЕН МАГНУС</a></li>
-                <li class="pa-fld6">sanctuary</li>
-                <li class="pa-fld2">Подними меня, <b><a href="https://crossfeeling.rusff.me/profile.php?id=3134">не дай
-                    упасть</a></b>, в <b><a href="https://crossfeeling.rusff.me/profile.php?id=3130">этой
-                    пропасти</a></b> я не хочу пропасть. Бей по щекам, причиняй мне боль. Через сердце искра 220 вольт.
-                </li>
+                <li class="pa-fld1"><a href="https://crossfeeling.rusff.me/viewtopic.php?id=8663">ИМЯ ПЕРСОНАЖА</a></li>
+                <li class="pa-fld6">фандом</li>
+                <li class="pa-fld2" data-id="lz">---</li>
             </ul>
         </div>
     </div>
@@ -22,23 +19,36 @@
     <div id="moderbot-profile-update-form">
         <div id="moderbot-profile-update-errors"></div>
         <textarea id="moderbot-profile-update-message"></textarea>
-        <button onclick="check()">Validate</button>
+        <button onclick="check()">Preview</button>
         <button id="moderbot-profile-update-button" disabled onclick="update()">Update</button>
     </div>
 </div>
 
 <script src="validate_html.js"></script>
 <script>
+    UserLogin = 'viper';
+    UserTitle = 'Not your standard model';
+    UserAvatar = '/img/avatars/001b/ec/ce/566-1751206576.png'
+
+    function loadPreview() {
+        document.querySelector('[data-id=username]').innerText = UserLogin;
+        document.querySelector('[data-id=title]').innerText = UserTitle;
+        document.querySelector('[data-id=avatar]').setAttribute('src', UserAvatar);
+    }
+
 function check() {
     const s = document.getElementById('moderbot-profile-update-message').value;
     const res = validate(s);
     if (res.status === 'valid') {
         document.getElementById('moderbot-profile-update-button').disabled = false;
         document.getElementById('moderbot-profile-update-errors').innerHTML = 'All good!';
+        document.querySelector('[data-id=lz]').innerHTML = s;
     } else {
         for (const error of res.errors) {
             document.getElementById('moderbot-profile-update-errors').innerHTML = '<span>'+error+'</span>';
         }
     }
 }
+
+loadPreview();
 </script>
