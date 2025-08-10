@@ -1,0 +1,15 @@
+<html>
+<body>
+<script src="validate_html.js"></script>
+<textarea id="test"></textarea>
+<button onclick="check()">Test</button>
+<script>
+   // const s = <a href="fgfgf>cdffgf</span>
+   function check() {
+       const s = document.getElementById("test").value
+       const res = validate(s);
+       console.log(res);
+   }
+</script>
+</body>
+</html>
