@@ -1,0 +1,79 @@
+   <h1>ModerBot Control</h1>
+
+    <label>Profile ID:
+        <input type="number" id="profileId" value="4391" placeholder="Enter profile ID">
+    </label>
+    <label>Field ID:
+        <input type="number" id="fieldId" value="2" placeholder="Enter field number">
+    </label>
+    <label>Field Value:
+        <input type="text" id="fieldValue" placeholder="Enter field value">
+    </label>
+
+    <button id="sendBtn">Send Update</button>
+
+    <h2>Status Updates</h2>
+    <div id="log"></div>
+
+    <script>
+        const logDiv = document.getElementById("log");
+        const sendBtn = document.getElementById("sendBtn");
+
+        // Connect to WebSocket server
+        const ws = new WebSocket("wss://crossfeel.ru");
+
+        ws.onopen = () => {
+            log("Connected to server");
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type && msg.message) {
+                    log(`[${msg.type}] ${msg.message}`);
+                } else {
+                    log(JSON.stringify(msg));
+                }
+            } catch (e) {
+                log(event.data);
+            }
+        };
+
+        ws.onerror = (error) => {
+            log("WebSocket error: " + error);
+        };
+
+        ws.onclose = () => {
+            log("Disconnected from server");
+        };
+
+        sendBtn.onclick = () => {
+            const profileId = document.getElementById("profileId").value;
+            const fieldId = document.getElementById("fieldId").value;
+            const fieldValue = document.getElementById("fieldValue").value;
+
+            if (!profileId || !fieldId || !fieldValue) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            const payload = {
+                command: "profile_update",
+                data: [{
+                    profile_id: parseInt(profileId, 10),
+                    field_number: parseInt(fieldId, 10),
+                    field_value: fieldValue
+                }]
+            };
+
+            ws.send(JSON.stringify(payload));
+            log("Sent command to server");
+        };
+
+        function log(message) {
+            const p = document.createElement("p");
+            p.textContent = message;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+    </script>

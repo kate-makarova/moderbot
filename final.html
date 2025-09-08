@@ -1,0 +1,247 @@
+<link rel="stylesheet" type="text/css" href="https://forumstatic.ru/files/0015/e5/b7/46268.css">
+<style>
+    #moderbot-profile-update-button[disabled] {
+        background: grey!important;
+    }
+</style>
+
+<div id="moderbot-profile-update-wrapper">
+
+    <div id="moderbot-profile-update-preview">
+        <h5 class="moderbot-profile-update-preview-title">предпросмотр профиля</h5>
+        <div class="post-author-preview">
+            <ul>
+                <li class="pa-fld7-preview"><div class="personal_icon"><img src="https://forumstatic.ru/files/001c/11/e3/50665.gif" original-title="Я часто вижу страх в смотрящих на меня глазах"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
+                <li class="pa-author-preview"></li>
+                <li class="pa-title-preview"></li>
+                <li class="pa-avatar-preview"><span class="indOnline-preview">online</span><img src=""></li>
+                <li class="pa-fld1-preview"><a href="https://crossfeeling.rusff.me/viewtopic.php?id=8663">ИМЯ ПЕРСОНАЖА</a></li>
+                <li class="pa-fld2-preview">--Ваш ЛЗ--</li>
+                <li class="pa-fld6-preview">sanctuary</li>
+                <li class="pa-fld4-preview"><div class="p_plash" style="background: url(https://forumstatic.ru/files/001c/11/e3/98596.png?v=1)"><b>Джедайская дипломатия</b><em>и агрессивные переговоры</em></div></li>
+            </ul>
+            <li class="pa-fld8-preview"><div class="personal_bg"><img src="https://forumstatic.ru/files/001c/11/e3/98596.png?v=1"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
+        </div>
+    </div>
+    <div id="moderbot-profile-update-form">
+        <div class="moderbot-profile-update-form__container">
+            <ul class="moderbot-profile-update-form__container-tabs">
+                <li class="moderbot-profile-update-form__container-tab active" tab-name="change_lz">изменить личное звание</li>
+                <li class="moderbot-profile-update-form__container-tab" tab-name="mirror">примерочная (фоны, плашки, иконки)</li>
+            </ul>
+            <div class="moderbot-profile-update-form__container-sections">
+                <div class="moderbot-profile-update-form__container-section" tab-name="change_lz" style="display: block">
+                    <div class="moderbot-profile-update-form__container-section-inner">
+                        <div id="update-message-work" class="update-message">
+                            <ul id="moderbot-log" class="update-message_error-list">
+                            </ul>
+                        </div>
+                        <div id="update-message-success" class="update-message">
+                            <h5 class="update-message_status correctly">Дворецкий не нашел ошибок</h5> <!-- это для примера -->
+                        </div>
+                        <div id="update-message-error" class="update-message"> <!-- display: flex когда есть обновления -->
+                            <h5 class="update-message_status error">Обнаруженные ошибки</h5>
+                            <ul id="moderbot-profile-update-errors" class="update-message_error-list">
+                            </ul>
+                        </div>
+                        <textarea id="moderbot-profile-update-message" class="moderbot-profile-update-fld input-lz" placeholder="Введите личное звание, используя HTML"></textarea>
+                        <div class="moderbot-profile-update-submit update-lz">
+                            <button class="moderbot-profile-update-button" name="preview-submit" onclick="check()">
+                                Посмотреть
+                            </button>
+                            <button id="moderbot-profile-update-button" class="moderbot-profile-update-button" name="preview-save" disabled onclick="callBot('moderbot-profile-update-message', 2)">
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="moderbot-profile-update-form__container-section" tab-name="mirror">
+                    <div class="moderbot-profile-update-form__container-section-inner">
+                        <div class="update-message"> <!-- display: flex когда есть обновления -->
+                            <h5 class="update-message_status correctly">Дворецкий обновил фон профиля</h5> <!-- это для примера -->
+                        </div>
+                        <div class="moderbot-profile-update-form__box">
+                            <h5 class="moderbot-profile-update-form__box-title">Установка плашки</h5>
+                            <div class="moderbot-profile-update-form__box-content">
+                                <input type="text" class="moderbot-profile-update-fld input-banner-text-top" placeholder="Верхний текст плашки">
+                                <input type="text" class="moderbot-profile-update-fld input-banner-text-bottom" placeholder="Нижкий текст плашки">
+                                <input type="text" class="moderbot-profile-update-fld input-banner-img" placeholder="Ссылка на картинку">
+                            </div>
+                        </div>
+                        <div class="moderbot-profile-update-form__box">
+                            <h5 class="moderbot-profile-update-form__box-title">Установка фона</h5>
+                            <div class="moderbot-profile-update-form__box-content">
+                                <input type="text" class="moderbot-profile-update-fld input-bg-img" placeholder="Ссылка на картинку">
+                            </div>
+                        </div>
+                        <div class="moderbot-profile-update-form__box">
+                            <h5 class="moderbot-profile-update-form__box-title">Установка иконки</h5>
+                            <div class="moderbot-profile-update-form__box-content">
+                                <input type="text" class="moderbot-profile-update-fld input-icon-text" placeholder="Подпись для иконки (текст, который будет выводиться по наведению)">
+                                <input type="text" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
+                            </div>
+                            <h5 class="moderbot-profile-update-form__box-title">Галлерея иконок</h5>
+                            <div class="moderbot-profile-update-form__box-content icons-gallery">
+                                <h5 class="icons-gallery-title">Осенние иконки</h5>
+                                <ul class="icons-gallery_list">
+                                    <li class="checked"><img src="https://upforme.ru/uploads/0015/e5/b7/3090/122472.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/456396.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/495599.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/436583.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                </ul>
+                            </div>
+                            <div class="moderbot-profile-update-form__box-content icons-gallery">
+                                <h5 class="icons-gallery-title">Стандартные иконки</h5>
+                                <ul class="icons-gallery_list">
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/990085.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/96653.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/56487.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="moderbot-profile-update-submit update-appearance">
+                            <button class="moderbot-profile-update-button" name="preview-submit">
+                                Посмотреть
+                            </button>
+                            <button class="moderbot-profile-update-button" name="preview-save">
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- для вкладок скрипт -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".moderbot-profile-update-form__container-tab").on("click", function () {
+            const container = $(this).closest('.moderbot-profile-update-form__container');
+
+            const target = $(this).attr("tab-name");
+
+            container.find(".moderbot-profile-update-form__container-tab").removeClass("active");
+            $(this).addClass("active");
+
+            container.find(".moderbot-profile-update-form__container-section").each(function () {
+                const sectionName = $(this).attr("tab-name");
+                if (sectionName === target) {
+                    $(this).stop().slideDown(300);
+                } else {
+                    $(this).stop().slideUp(300);
+                }
+            });
+        });
+    });
+</script>
+<script src="https://forumstatic.ru/files/001b/f1/83/36962.js"></script>
+<script>
+    function loadPreview() {
+        document.querySelector('.pa-author-preview').innerText = UserLogin;
+        document.querySelector('.pa-title-preview').innerText = UserTitle;
+        document.querySelector('.pa-avatar-preview img').setAttribute('src', UserAvatar);
+    }
+
+    function check() {
+        const correct_message = document.getElementById('update-message-success');
+        const error_message = document.getElementById('update-message-error');
+        const s = document.getElementById('moderbot-profile-update-message').value;
+        const res = validate(s);
+        if (res.status === 'valid') {
+            error_message.style.display = 'none';
+            correct_message.style.display = 'block';
+            document.getElementById('moderbot-profile-update-button').disabled = false;
+            document.getElementById('moderbot-profile-update-errors').innerHTML = 'All good!';
+            document.querySelector('.pa-fld2-preview').innerHTML = s;
+        } else {
+            const errorBox = document.getElementById('moderbot-profile-update-errors');
+            correct_message.style.display = 'none';
+            error_message.style.display = 'block';
+            errorBox.innerHTML = '';
+            for (const error of res.errors) {
+                errorBox.innerHTML += '<li>'+error+'</li>';
+            }
+        }
+    }
+
+    loadPreview();
+</script>
+
+<script>
+    // Connect to WebSocket server
+    const ws = new WebSocket("wss://crossfeel.ru");
+
+    ws.onopen = () => {
+        console.log("Connected to server");
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const msg = JSON.parse(event.data);
+            if (msg.type && msg.message) {
+                log(`[${msg.type}] ${msg.message}`);
+                if (msg.message == 'Bot has finished working') {alert('All done!');}
+            } else {
+                console.log(JSON.stringify(msg));
+            }
+        } catch (e) {
+            console.log(event.data);
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.log("WebSocket error: " + error);
+    };
+
+    ws.onclose = () => {
+        console.log("Disconnected from server");
+    };
+
+    function log(message) {
+        document.getElementById('moderbot-log').innerHTML += '<li>'+message+'</li>';
+    }
+
+    function callBot(elemId, fieldId) {
+        const update_message = document.getElementById('update-message-work');
+        const correct_message = document.getElementById('update-message-success');
+        const error_message = document.getElementById('update-message-error');
+        error_message.style.display = 'none';
+        correct_message.style.display = 'none';
+        update_message.style.display = 'none';
+
+        const profileId = UserID;
+        const fieldValue = document.getElementById(elemId).value;
+
+        if (!profileId || !fieldId || !fieldValue) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        const payload = {
+            command: "profile_update",
+            data: [{
+                profile_id: parseInt(profileId, 10),
+                field_number: fieldId,
+                field_value: fieldValue
+            }]
+        };
+
+        ws.send(JSON.stringify(payload));
+    }
+</script>
