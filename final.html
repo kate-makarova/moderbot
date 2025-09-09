@@ -18,7 +18,7 @@
                 <li class="pa-fld1-preview"><a href="https://crossfeeling.rusff.me/viewtopic.php?id=8663">ИМЯ ПЕРСОНАЖА</a></li>
                 <li class="pa-fld2-preview">--Ваш ЛЗ--</li>
                 <li class="pa-fld6-preview">sanctuary</li>
-                <li class="pa-fld4-preview"><div class="p_plash" style="background: url(https://forumstatic.ru/files/001c/11/e3/98596.png?v=1)"><b>Джедайская дипломатия</b><em>и агрессивные переговоры</em></div></li>
+                <li class="pa-fld4-preview"><div class="p_plash" style="background: url(https://forumstatic.ru/files/001c/11/e3/98596.png?v=1)"><b>Верхний текст плашки</b><em>Нижний текст плашки</em></div></li>
             </ul>
             <li class="pa-fld8-preview"><div class="personal_bg"><img src="https://forumstatic.ru/files/001c/11/e3/98596.png?v=1"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
         </div>
@@ -63,22 +63,22 @@
                         <div class="moderbot-profile-update-form__box">
                             <h5 class="moderbot-profile-update-form__box-title">Установка плашки</h5>
                             <div class="moderbot-profile-update-form__box-content">
-                                <input type="text" class="moderbot-profile-update-fld input-banner-text-top" placeholder="Верхний текст плашки">
-                                <input type="text" class="moderbot-profile-update-fld input-banner-text-bottom" placeholder="Нижкий текст плашки">
-                                <input type="text" class="moderbot-profile-update-fld input-banner-img" placeholder="Ссылка на картинку">
+                                <input type="text" id="moderbot-batter-text-top" class="moderbot-profile-update-fld input-banner-text-top" placeholder="Верхний текст плашки">
+                                <input type="text" id="moderbot-batter-text-bottom" class="moderbot-profile-update-fld input-banner-text-bottom" placeholder="Нижкий текст плашки">
+                                <input type="text" id="moderbot-batter-text-img" class="moderbot-profile-update-fld input-banner-img" placeholder="Ссылка на картинку">
                             </div>
                         </div>
                         <div class="moderbot-profile-update-form__box">
                             <h5 class="moderbot-profile-update-form__box-title">Установка фона</h5>
                             <div class="moderbot-profile-update-form__box-content">
-                                <input type="text" class="moderbot-profile-update-fld input-bg-img" placeholder="Ссылка на картинку">
+                                <input type="text" id="moderbot-bg-img" class="moderbot-profile-update-fld input-bg-img" placeholder="Ссылка на картинку">
                             </div>
                         </div>
                         <div class="moderbot-profile-update-form__box">
                             <h5 class="moderbot-profile-update-form__box-title">Установка иконки</h5>
                             <div class="moderbot-profile-update-form__box-content">
-                                <input type="text" class="moderbot-profile-update-fld input-icon-text" placeholder="Подпись для иконки (текст, который будет выводиться по наведению)">
-                                <input type="text" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
+                                <input type="text" id="moderbot-icon-text" class="moderbot-profile-update-fld input-icon-text" placeholder="Подпись для иконки (текст, который будет выводиться по наведению)">
+                                <input type="text" id="moderbot-icom-img" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
                             </div>
                             <h5 class="moderbot-profile-update-form__box-title">Галлерея иконок</h5>
                             <div class="moderbot-profile-update-form__box-content icons-gallery">
@@ -180,6 +180,50 @@
         }
     }
 
+    function setDecorations() {
+        let setPlate = false;
+        let setBackground = false;
+        let setIcon = false;
+
+        let textTop = document.getElementById('moderbot-batter-text-top').value;
+        let textBottom = document.getElementById('moderbot-batter-text-bottom').value;
+        let textImg = document.getElementById('moderbot-batter-text-img').value;
+        if (textTop.length || textBottom.length || textImg.length) {
+            const oldBackground = UserFld8 ?? '';
+            const id = oldBackground.match(/a id="([^"]*)"/)[1];
+            textTop = textTop.length? textTop : oldBackground.match(/<b>([^>]*)<\/b>/)[1];
+            textBottom = textBottom.length? textBottom : oldBackground.match(/<em>([^>]*)<\/em>/)[1];
+            textImg = textImg.length? textImg : oldBackground.match(/url\(([^)]*)\)/)[1];
+
+            if(textTop.length && textBottom.length && textImg.length) {
+                setPlate = true;
+                const plate = '<a id="' + id + '" class="modal-link" href="#" data-reveal-id="character"><div class="p_plash" style="background: url(' + textImg + ')"><b>' + textTop + '</b><em>' + textBottom + '</em></div></a>';
+                document.querySelector('.pa-fld4-preview').innerHTML = plate;
+            }
+        }
+
+        const backgroundImg = document.getElementById('moderbot-bg-img').value;
+        if (backgroundImg.length) {
+            setBackground = true;
+            const background = '<div class="personal_bg"><img src="'+backgroundImg+'"></div>';
+            document.querySelector('.pa-fld8-preview').innerHTML = background;
+        }
+
+        let iconText = document.getElementById('moderbot-icon-text').value;
+        let iconImg = document.getElementById('moderbot-icon-img').value;
+        if (iconText.length || iconImg.length) {
+            setIcon = true;
+            const oldIcon = UserFld7 ?? '';
+            iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)
+            iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)
+            if (iconImg && iconText) {
+                setIcon = true;
+                const icon = '<span class="fld-name">иконка сверху:</span> <div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
+                document.querySelector('.pa-fld7-preview').innerHTML = icon;
+            }
+        }
+    }
+
     loadPreview();
 </script>
 
@@ -196,7 +240,6 @@
             const msg = JSON.parse(event.data);
             if (msg.type && msg.message) {
                 log(`[${msg.type}] ${msg.message}`);
-                if (msg.message == 'Bot has finished working') {alert('All done!');}
             } else {
                 console.log(JSON.stringify(msg));
             }
@@ -223,7 +266,7 @@
         const error_message = document.getElementById('update-message-error');
         error_message.style.display = 'none';
         correct_message.style.display = 'none';
-        update_message.style.display = 'none';
+        update_message.style.display = 'block';
 
         const profileId = UserID;
         const fieldValue = document.getElementById(elemId).value;
