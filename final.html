@@ -1,6 +1,7 @@
 <link rel="stylesheet" type="text/css" href="https://forumstatic.ru/files/0015/e5/b7/46268.css">
 <style>
-    #moderbot-profile-update-button[disabled] {
+    #moderbot-profile-update-button[disabled], 
+    #moderbot-profile-update-decorations-button[disabled] {
         background: grey!important;
     }
 </style>
@@ -49,7 +50,7 @@
                             <button class="moderbot-profile-update-button" name="preview-submit" onclick="check()">
                                 Посмотреть
                             </button>
-                            <button id="moderbot-profile-update-button" class="moderbot-profile-update-button" name="preview-save" disabled onclick="callBot('moderbot-profile-update-message', 2)">
+                            <button id="moderbot-profile-update-button" class="moderbot-profile-update-button" name="preview-save" disabled onclick="callBot({2: document.getElementById('moderbot-profile-update-message').value})">
                                 Сохранить
                             </button>
                         </div>
@@ -114,10 +115,12 @@
                             </div>
                         </div>
                         <div class="moderbot-profile-update-submit update-appearance">
-                            <button class="moderbot-profile-update-button" name="preview-submit">
+                            <button class="moderbot-profile-update-button" name="preview-submit" onclick="checkDecorations()">
                                 Посмотреть
                             </button>
-                            <button class="moderbot-profile-update-button" name="preview-save">
+                            <button id="moderbot-profile-update-decorations-button" 
+                                    class="moderbot-profile-update-button" name="preview-save" disabled
+                            onclick="updateDecorations()">
                                 Сохранить
                             </button>
                         </div>
@@ -152,6 +155,8 @@
 </script>
 <script src="https://forumstatic.ru/files/001b/f1/83/36962.js"></script>
 <script>
+    let data = {};
+    let sendDecorations = false;
     function loadPreview() {
         document.querySelector('.pa-author-preview').innerText = UserLogin;
         document.querySelector('.pa-title-preview').innerText = UserTitle;
@@ -180,11 +185,7 @@
         }
     }
 
-    function setDecorations() {
-        let setPlate = false;
-        let setBackground = false;
-        let setIcon = false;
-
+    function checkDecorations() {
         let textTop = document.getElementById('moderbot-batter-text-top').value;
         let textBottom = document.getElementById('moderbot-batter-text-bottom').value;
         let textImg = document.getElementById('moderbot-batter-text-img').value;
@@ -196,31 +197,43 @@
             textImg = textImg.length? textImg : oldBackground.match(/url\(([^)]*)\)/)[1];
 
             if(textTop.length && textBottom.length && textImg.length) {
-                setPlate = true;
+                sendDecorations = true;
                 const plate = '<a id="' + id + '" class="modal-link" href="#" data-reveal-id="character"><div class="p_plash" style="background: url(' + textImg + ')"><b>' + textTop + '</b><em>' + textBottom + '</em></div></a>';
                 document.querySelector('.pa-fld4-preview').innerHTML = plate;
+                data[4] = plate;
             }
         }
 
         const backgroundImg = document.getElementById('moderbot-bg-img').value;
         if (backgroundImg.length) {
-            setBackground = true;
+            sendDecorations = true;
             const background = '<div class="personal_bg"><img src="'+backgroundImg+'"></div>';
             document.querySelector('.pa-fld8-preview').innerHTML = background;
+            data[8] = background;
         }
 
         let iconText = document.getElementById('moderbot-icon-text').value;
         let iconImg = document.getElementById('moderbot-icon-img').value;
         if (iconText.length || iconImg.length) {
-            setIcon = true;
             const oldIcon = UserFld7 ?? '';
             iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)
             iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)
             if (iconImg && iconText) {
-                setIcon = true;
+                sendDecorations = true;
                 const icon = '<span class="fld-name">иконка сверху:</span> <div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
                 document.querySelector('.pa-fld7-preview').innerHTML = icon;
+                data[7] = icon;
             }
+        }
+        
+        document.getElementById('moderbot-profile-update-button').disabled = false;
+    }
+    
+    function updateDecorations() {
+        if (sendDecorations) {
+            callBot(data);
+        } else {
+            alert('You have not changed anything');
         }
     }
 
@@ -260,7 +273,7 @@
         document.getElementById('moderbot-log').innerHTML += '<li>'+message+'</li>';
     }
 
-    function callBot(elemId, fieldId) {
+    function callBot(data) {
         const update_message = document.getElementById('update-message-work');
         const correct_message = document.getElementById('update-message-success');
         const error_message = document.getElementById('update-message-error');
@@ -269,7 +282,6 @@
         update_message.style.display = 'block';
 
         const profileId = UserID;
-        const fieldValue = document.getElementById(elemId).value;
 
         if (!profileId || !fieldId || !fieldValue) {
             alert("Please fill in all fields");
@@ -278,12 +290,16 @@
 
         const payload = {
             command: "profile_update",
-            data: [{
-                profile_id: parseInt(profileId, 10),
-                field_number: fieldId,
-                field_value: fieldValue
-            }]
+            data: []
         };
+        for (let [fieldId, fieldValue] of Object.entries(data)) {
+
+           payload.data.push({
+                    profile_id: parseInt(profileId, 10),
+                    field_number: fieldId,
+                    field_value: fieldValue
+                });
+        }
 
         ws.send(JSON.stringify(payload));
     }
