@@ -27,8 +27,8 @@
     <div id="moderbot-profile-update-form">
         <div class="moderbot-profile-update-form__container">
             <ul class="moderbot-profile-update-form__container-tabs">
-                <li class="moderbot-profile-update-form__container-tab active" tab-name="change_lz">изменить личное звание</li>
-                <li class="moderbot-profile-update-form__container-tab" tab-name="mirror">примерочная (фоны, плашки, иконки)</li>
+                <li class="moderbot-profile-update-form__container-tab active" tab-name="change_lz" data-logId="moderbot-log">изменить личное звание</li>
+                <li class="moderbot-profile-update-form__container-tab" tab-name="mirror" data-logId="moderbot-log-decorations">примерочная (фоны, плашки, иконки)</li>
             </ul>
             <div class="moderbot-profile-update-form__container-sections">
                 <div class="moderbot-profile-update-form__container-section" tab-name="change_lz" style="display: block">
@@ -58,8 +58,9 @@
                 </div>
                 <div class="moderbot-profile-update-form__container-section" tab-name="mirror">
                     <div class="moderbot-profile-update-form__container-section-inner">
-                        <div class="update-message"> <!-- display: flex когда есть обновления -->
-                            <h5 class="update-message_status correctly">Дворецкий обновил фон профиля</h5> <!-- это для примера -->
+                        <div id="update-message-work-decorations" class="update-message">
+                            <ul id="moderbot-log-decorations" class="update-message_error-list">
+                            </ul>
                         </div>
                         <div class="moderbot-profile-update-form__box">
                             <h5 class="moderbot-profile-update-form__box-title">Установка плашки</h5>
@@ -82,10 +83,11 @@
                                 <input type="text" id="moderbot-icon-img" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
                             </div>
                             <h5 class="moderbot-profile-update-form__box-title">Галлерея иконок</h5>
-                            <div class="moderbot-profile-update-form__box-content icons-gallery">
+                            <div id="moderbot-icons-gallery" class="moderbot-profile-update-form__box-content icons-gallery">
                                 <h5 class="icons-gallery-title">Осенние иконки</h5>
                                 <ul class="icons-gallery_list">
-                                    <li class="checked"><img src="https://upforme.ru/uploads/0015/e5/b7/3090/122472.png"></li>
+                                    <li class="checked">
+                                        <img src="https://upforme.ru/uploads/0015/e5/b7/3090/122472.png"></li>
                                     <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/456396.png"></li>
                                     <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
                                     <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/495599.png"></li>
@@ -133,11 +135,13 @@
 
 <!-- для вкладок скрипт -->
 <script>
+    let botLogId = 'moderbot-log';
     document.addEventListener("DOMContentLoaded", function () {
         $(".moderbot-profile-update-form__container-tab").on("click", function () {
             const container = $(this).closest('.moderbot-profile-update-form__container');
 
             const target = $(this).attr("tab-name");
+            botLogId = $(this).data("logId");
 
             container.find(".moderbot-profile-update-form__container-tab").removeClass("active");
             $(this).addClass("active");
@@ -199,6 +203,16 @@
             textBottom = textBottom.length? textBottom : oldBackground.match(/<em>([^>]*)<\/em>/)[1];
             textImg = textImg.length? textImg : oldBackground.match(/url\(([^)]*)\)/)[1];
 
+            if(!textTop.length) {
+                document.getElementById('moderbot-batter-text-top').classList.add('error');
+            }
+            if(!textBottom.length) {
+                document.getElementById('moderbot-batter-text-bottom').classList.add('error');
+            }
+            if(!textImg.length) {
+                document.getElementById('moderbot-batter-text-img').classList.add('error');
+            }
+
             if(textTop.length && textBottom.length && textImg.length) {
                 sendDecorations = true;
                 const plate = '<a id="' + id + '" class="modal-link" href="#" data-reveal-id="character"><div class="p_plash" style="background: url(' + textImg + ')"><b>' + textTop + '</b><em>' + textBottom + '</em></div></a>';
@@ -224,6 +238,14 @@
             }
             iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)[1]
             iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)[1]
+
+            if(!iconText.length) {
+                document.getElementById('moderbot-icon-text').classList.add('error');
+            }
+            if(!iconImg.length) {
+                document.getElementById('moderbot-icon-img').classList.add('error');
+            }
+
             if (iconImg.length && iconText.length) {
                 sendDecorations = true;
                 const icon = '<div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
@@ -244,6 +266,53 @@
     }
 
     loadPreview();
+</script>
+
+<script>
+    async function parseIconsFile(fileUrl) {
+        icons = {}
+        fetch(fileUrl)
+            .then(response => response.text())
+            .then(text => text);
+        const rows = text.split('\n');
+        for (const row of rows) {
+            let category = '';
+            if (row.indexOf('https://') === -1 && row[0] !== '-') {
+                category = row;
+                icons[category] = [];
+            }
+            if (row[0] === '-') {
+                continue;
+            }
+            if (row.indexOf('https://') !== -1) {
+                icons[category].push(row);
+            }
+        }
+
+        const iconsContainer = document.getElementById('moderbot-icons-gallery');
+        iconsContainer.innerHTML = '';
+        for (const category in icons) {
+            const categoryTitle = document.createElement('h5');
+            categoryTitle.className = 'icons-gallery-title';
+            categoryTitle.innerText = category;
+            iconsContainer.appendChild(categoryTitle);
+            const categoryList = document.createElement('ul');
+            categoryList.className = 'icons-gallery_list';
+            icons[category].forEach(icon => {
+                const listItem = document.createElement('li');
+                const img = document.createElement('img');
+                img.src = icon;
+                img.addEventListener('click', () => {pickIcon(img)});
+                listItem.appendChild(img);
+                categoryList.appendChild(listItem);
+
+            })
+        }
+    }
+
+    function pickIcon(elem) {
+        document.getElementById('moderbot-icom-img').value = elem.src;
+    }
 </script>
 
 <script>
@@ -276,7 +345,7 @@
     };
 
     function log(message) {
-        document.getElementById('moderbot-log').innerHTML += '<li>'+message+'</li>';
+        document.getElementById(botLogId).innerHTML += '<li>'+message+'</li>';
     }
 
     function callBot(data) {
