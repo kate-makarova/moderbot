@@ -241,6 +241,53 @@
 </script>
 
 <script>
+    async function parseIconsFile(fileUrl) {
+        icons = {}
+        fetch(fileUrl)
+            .then(response => response.text())
+            .then(text => text);
+        const rows = text.split('\n');
+        for (const row of rows) {
+            let category = '';
+            if (row.indexOf('https://') === -1 && row[0] !== '-') {
+                category = row;
+                icons[category] = [];
+            }
+            if (row[0] === '-') {
+                continue;
+            }
+            if (row.indexOf('https://') !== -1) {
+                icons[category].push(row);
+            }
+        }
+
+        const iconsContainer = document.getElementById('moderbot-icons-gallery');
+        iconsContainer.innerHTML = '';
+        for (const category in icons) {
+            const categoryTitle = document.createElement('h5');
+            categoryTitle.className = 'icons-gallery-title';
+            categoryTitle.innerText = category;
+            iconsContainer.appendChild(categoryTitle);
+            const categoryList = document.createElement('ul');
+            categoryList.className = 'icons-gallery_list';
+            icons[category].forEach(icon => {
+                const listItem = document.createElement('li');
+                const img = document.createElement('img');
+                img.src = icon;
+                img.addEventListener('click', () => {pickIcon(img)});
+                listItem.appendChild(img);
+                categoryList.appendChild(listItem);
+                
+            })
+        }
+    }
+
+    function pickIcon(elem) {
+        document.getElementById('moderbot-icom-img').value = elem.src;
+    }
+</script>
+
+<script>
     // Connect to WebSocket server
     const ws = new WebSocket("wss://crossfeel.ru");
 
