@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="https://forumstatic.ru/files/0015/e5/b7/46268.css">
 <style>
-    #moderbot-profile-update-button[disabled], 
+    #moderbot-profile-update-button[disabled],
     #moderbot-profile-update-decorations-button[disabled] {
         background: grey!important;
     }
@@ -79,7 +79,7 @@
                             <h5 class="moderbot-profile-update-form__box-title">Установка иконки</h5>
                             <div class="moderbot-profile-update-form__box-content">
                                 <input type="text" id="moderbot-icon-text" class="moderbot-profile-update-fld input-icon-text" placeholder="Подпись для иконки (текст, который будет выводиться по наведению)">
-                                <input type="text" id="moderbot-icom-img" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
+                                <input type="text" id="moderbot-icon-img" class="moderbot-profile-update-fld input-icon-img" placeholder="Своя ссылка на картинку или выберете из галлереи">
                             </div>
                             <h5 class="moderbot-profile-update-form__box-title">Галлерея иконок</h5>
                             <div class="moderbot-profile-update-form__box-content icons-gallery">
@@ -118,9 +118,9 @@
                             <button class="moderbot-profile-update-button" name="preview-submit" onclick="checkDecorations()">
                                 Посмотреть
                             </button>
-                            <button id="moderbot-profile-update-decorations-button" 
+                            <button id="moderbot-profile-update-decorations-button"
                                     class="moderbot-profile-update-button" name="preview-save" disabled
-                            onclick="updateDecorations()">
+                                    onclick="updateDecorations()">
                                 Сохранить
                             </button>
                         </div>
@@ -190,7 +190,10 @@
         let textBottom = document.getElementById('moderbot-batter-text-bottom').value;
         let textImg = document.getElementById('moderbot-batter-text-img').value;
         if (textTop.length || textBottom.length || textImg.length) {
-            const oldBackground = UserFld8 ?? '';
+            let oldBackground = '<a id=""><b></b><em></em>url()';
+            if (typeof UserFld8 != 'undefined') {
+                oldBackground = UserFld8;
+            }
             const id = oldBackground.match(/a id="([^"]*)"/)[1];
             textTop = textTop.length? textTop : oldBackground.match(/<b>([^>]*)<\/b>/)[1];
             textBottom = textBottom.length? textBottom : oldBackground.match(/<em>([^>]*)<\/em>/)[1];
@@ -215,20 +218,23 @@
         let iconText = document.getElementById('moderbot-icon-text').value;
         let iconImg = document.getElementById('moderbot-icon-img').value;
         if (iconText.length || iconImg.length) {
-            const oldIcon = UserFld7 ?? '';
-            iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)
-            iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)
-            if (iconImg && iconText) {
+            let oldIcon = 'title=""src=""';
+            if (typeof UserFld7 != 'undefined') {
+                oldIcon = UserFld7;
+            }
+            iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)[1]
+            iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)[1]
+            if (iconImg.length && iconText.length) {
                 sendDecorations = true;
-                const icon = '<span class="fld-name">иконка сверху:</span> <div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
+                const icon = '<div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
                 document.querySelector('.pa-fld7-preview').innerHTML = icon;
                 data[7] = icon;
             }
         }
-        
+
         document.getElementById('moderbot-profile-update-button').disabled = false;
     }
-    
+
     function updateDecorations() {
         if (sendDecorations) {
             callBot(data);
@@ -283,22 +289,17 @@
 
         const profileId = UserID;
 
-        if (!profileId || !fieldId || !fieldValue) {
-            alert("Please fill in all fields");
-            return;
-        }
-
         const payload = {
             command: "profile_update",
             data: []
         };
         for (let [fieldId, fieldValue] of Object.entries(data)) {
 
-           payload.data.push({
-                    profile_id: parseInt(profileId, 10),
-                    field_number: fieldId,
-                    field_value: fieldValue
-                });
+            payload.data.push({
+                profile_id: parseInt(profileId, 10),
+                field_number: fieldId,
+                field_value: fieldValue
+            });
         }
 
         ws.send(JSON.stringify(payload));
