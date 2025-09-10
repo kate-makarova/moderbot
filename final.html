@@ -85,35 +85,6 @@
                             <h5 class="moderbot-profile-update-form__box-title">Галлерея иконок</h5>
                             <div id="moderbot-icons-gallery" class="moderbot-profile-update-form__box-content icons-gallery">
                                 <h5 class="icons-gallery-title">Осенние иконки</h5>
-                                <ul class="icons-gallery_list">
-                                    <li class="checked">
-                                        <img src="https://upforme.ru/uploads/0015/e5/b7/3090/122472.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/456396.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/495599.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/436583.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                </ul>
-                            </div>
-                            <div class="moderbot-profile-update-form__box-content icons-gallery">
-                                <h5 class="icons-gallery-title">Стандартные иконки</h5>
-                                <ul class="icons-gallery_list">
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/990085.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/96653.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/56487.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                    <li><img src="https://upforme.ru/uploads/0015/e5/b7/3090/434120.png"></li>
-                                </ul>
                             </div>
                         </div>
                         <div class="moderbot-profile-update-submit update-appearance">
@@ -271,17 +242,17 @@
 <script>
     async function parseIconsFile(fileUrl) {
         icons = {}
-        fetch(fileUrl)
+        const text = await fetch(fileUrl)
             .then(response => response.text())
             .then(text => text);
         const rows = text.split('\n');
+        let category = '';
         for (const row of rows) {
-            let category = '';
-            if (row.indexOf('https://') === -1 && row[0] !== '-') {
+            if (row.indexOf('https://') === -1 && row[0] !== '-' && row.replace(' ', '').length) {
                 category = row;
                 icons[category] = [];
             }
-            if (row[0] === '-') {
+            if (row[0] === '-' || !row.replace(' ', '').length) {
                 continue;
             }
             if (row.indexOf('https://') !== -1) {
@@ -300,19 +271,21 @@
             categoryList.className = 'icons-gallery_list';
             icons[category].forEach(icon => {
                 const listItem = document.createElement('li');
-                const img = document.createElement('img');
-                img.src = icon;
-                img.addEventListener('click', () => {pickIcon(img)});
-                listItem.appendChild(img);
-                categoryList.appendChild(listItem);
-
+                categoryList.innerHTML += `<li onclick="pickIcon('${icon}', this)"><img src="${icon}"/></li>`;
             })
+            iconsContainer.appendChild(categoryList);
         }
     }
 
-    function pickIcon(elem) {
-        document.getElementById('moderbot-icom-img').value = elem.src;
+    function pickIcon(source, elem) {
+        document.getElementById('moderbot-icon-img').value = source;
+        document.querySelectorAll('.icons-gallery_list li').forEach((el) => {
+            el.classList.remove('checked')
+        })
+        elem.classList.add('checked')
     }
+
+    parseIconsFile('https://forumstatic.ru/files/001b/f1/83/40096.txt');
 </script>
 
 <script>
