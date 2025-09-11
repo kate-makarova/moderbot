@@ -8,8 +8,9 @@ var episodeListSettings = {
     ],
     order_field: 'date',
     categories: ['Very Long Ago', 'Not Long Ago', 'Now'],
-    category_template: '<div><h5>{category}</h5>{episodes}</div>',
-    episode_template: '<a href="episode.html?id={topic_id}">{title}</a> <span>{date}</span> <span>{description}</span>',
+    category_template: '<div><h5>{category}</h5><ul>{episodes}</ul></div>',
+    button_template: '<button onclick>Edit</button>',
+    episode_template: '<li>{button} <a href="episode.html?id={topic_id}">{title}</a> <span>{date}</span> <span>{description}</span></li>',
 }
 
 var episodeTree = {};
@@ -100,6 +101,13 @@ function saveEpisode(episode) {
     renderEpisodeList();
 }
 
+function editEpisode(category, topic_id) {
+    let episode = episodeTree[category].find(episode => episode.topic_id === topic_id);
+    let form = renderEditEpisodeForm(episode);
+    document.getElementById('episode_list').innerHTML = '';
+    document.getElementById('episode_list').appendChild(form);
+}
+
 
 
 async function loadEpisodes() {
@@ -114,10 +122,11 @@ function renderEpisodeList() {
         for (const episode of episodes) {
             for (const field of episodeListSettings.fields) {
                 episodeHTML += episodeListSettings.episode_template.replace('{'+field.name+'}', episode[field.name]);
+                let button = episodeListSettings.button_template.replace('onclick', 'onclick="editEpisode(\''+category+'\','+episode.topic_id+')"');
+                episodeHTML  = episodeHTML.replace('{button}', button);
             }
         }
         let categoryHTML = episodeListSettings.category_template.replace('{category}', category);
-        categoryHTML = categoryHTML.replace('{episodes}', episodeHTML);
         episodeListHTML += categoryHTML;
     }
     document.getElementById('episode_list').innerHTML = episodeListHTML;
