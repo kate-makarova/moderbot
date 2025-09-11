@@ -4,16 +4,17 @@
  * Everyone who has the right to edit the topic can edit the data.
  */
 class SharedTopicStorage {
-    constructor(postId) {
-        this.postId = postId;
+    constructor(topicId) {
+        this.topicId = topicId;
         this.currentPostId = null;
         this.currentPostNumber = null;
     }
 
     async loadData() {
-        const postData = await fetch('/api.php?').then(response => response.json());
+        const postData = await fetch('/api.php?topic+id='+this.topicId).then(response => response.json());
         this.currentPostId = postData.id;
         this.currentPostNumber = postData.number;
+        this.data = postData.message;
     }
 
     delay(ms) {
@@ -22,7 +23,20 @@ class SharedTopicStorage {
         });
     }
 
+    async waitForNewPost(oldPostId, timeout = 5000) {
+        const start = Date.now();
+        while (Date.now() - start < timeout) {
+            await this.delay(500);
+            await this.loadData();
+            if (this.currentPostId !== oldPostId) {
+                return true;
+            }
+        }
+        throw new Error('Timeout waiting for new post');
+    }
+
     async saveData(data) {
+        const oldPostId = this.currentPostId;
         const frame = document.createElement('iframe');
         frame.src = '/api.php?';
         frame.style.display = 'none';
@@ -31,9 +45,26 @@ class SharedTopicStorage {
             frame.contentWindow.document.getElementById('submit').click();
         }
         document.body.appendChild(frame);
-        await this.delay(2000);
+
+        try {
+            await this.waitForNewPost(oldPostId);
+        } catch (e) {
+            console.warn('Post may not have been updated in time.');
+        }
+
         document.body.removeChild(frame);
-        await this.loadData();
         return true;
+    }
+
+    getPostNumber() {
+        return this.currentPostNumber;
+    }
+
+    getPostId() {
+        return this.currentPostId;
+    }
+
+    getData() {
+        return this.data;
     }
 }
