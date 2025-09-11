@@ -1,0 +1,39 @@
+/**
+ * This class allows using a forum topic as a shared storage for any information you need.
+ * Every post serves as a revision of the data, the last post being the current version.
+ * Everyone who has the right to edit the topic can edit the data.
+ */
+class SharedTopicStorage {
+    constructor(postId) {
+        this.postId = postId;
+        this.currentPostId = null;
+        this.currentPostNumber = null;
+    }
+
+    async loadData() {
+        const postData = await fetch('/api.php?').then(response => response.json());
+        this.currentPostId = postData.id;
+        this.currentPostNumber = postData.number;
+    }
+
+    delay(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
+    }
+
+    async saveData(data) {
+        const frame = document.createElement('iframe');
+        frame.src = '/api.php?';
+        frame.style.display = 'none';
+        frame.onload = () => {
+            frame.contentWindow.document.getElementById('post').value = data;
+            frame.contentWindow.document.getElementById('submit').click();
+        }
+        document.body.appendChild(frame);
+        await this.delay(2000);
+        document.body.removeChild(frame);
+        await this.loadData();
+        return true;
+    }
+}
