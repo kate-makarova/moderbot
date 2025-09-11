@@ -10,10 +10,11 @@ var episodeListSettings = {
     categories: ['Very Long Ago', 'Not Long Ago', 'Now'],
     category_template: '<div><h5>{category}</h5><ul>{episodes}</ul></div>',
     button_template: '<button onclick>Edit</button>',
-    episode_template: '<li>{button} <a href="episode.html?id={topic_id}">{title}</a> <span>{date}</span> <span>{description}</span></li>',
+    episode_template: '<li>{button} <a href="/topic.html?id={topic_id}">{title}</a> <span>{date}</span> <span>{description}</span></li>',
 }
 
 var episodeTree = {};
+const storage = new SharedTopicStorage(episodeListSettings.topic_id);
 
 class Episode {
     constructor(topic_id, category, is_new = false) {
@@ -46,7 +47,7 @@ function renderEditEpisodeForm(episode = null) {
     let fields = episodeListSettings.fields;
     fields.push({name: 'category', type: 'select', options: episodeListSettings.categories});
 
-    let form = document.createElement('form');
+    let form = document.createElement('div');
     for (const field of fields) {
         let input = null;
         switch (field.type) {
@@ -81,23 +82,24 @@ function renderEditEpisodeForm(episode = null) {
     }
     let submit = document.createElement('input');
     submit.type = 'submit';
-    submit.onclick(() => {
+    submit.onclick(async () => {
         episode = new Episode(episode ? episode.topic_id : null, form.category.value, !episode);
         episode.setFields(fields);
-        saveEpisode(episode);
+        await saveEpisode(episode);
     })
     form.appendChild(submit);
 
     return form;
 }
 
-function saveEpisode(episode) {
+async function saveEpisode(episode) {
     if (episode.is_new) {
         episodeTree[episode.category].push(episode);
         episodeTree[episode.category].sort((a, b) => a.getIndexField() - b.getIndexField());
     } else {
         episodeTree[episode.category][episode.getIndex()] = episode;
     }
+    await storage.saveData(JSON.stringify(episodeTree));
     renderEpisodeList();
 }
 
@@ -111,12 +113,13 @@ function editEpisode(category, topic_id) {
 
 
 async function loadEpisodes() {
-    episodeTree = await fetch('').then(response => response.json());
+    const text = await storage.loadData();
+    episodeTree = JSON.parse(storage.getData());
 }
 
 function renderEpisodeList() {
     let episodeListHTML = '';
-    for (let category in episodeListSettings) {
+    for (let category in episodeTree) {
         let episodes = episodeTree[category];
         let episodeHTML = '';
         for (const episode of episodes) {
@@ -127,6 +130,7 @@ function renderEpisodeList() {
             }
         }
         let categoryHTML = episodeListSettings.category_template.replace('{category}', category);
+        categoryHTML = categoryHTML.replace('{episodes}', episodeHTML);
         episodeListHTML += categoryHTML;
     }
     document.getElementById('episode_list').innerHTML = episodeListHTML;
