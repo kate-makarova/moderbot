@@ -67,4 +67,13 @@ class SharedTopicStorage {
     getData() {
         return this.data;
     }
+
+    showLimitWarning() {
+        const postsLeft = PostLimit - this.currentPostNumber;
+        if (postsLeft < 10) {
+            return `<span style="color: red;">Warning: This topic is near the limit. You have ${postsLeft} posts left</span>`
+        } else {
+            return '';
+        }
+    }
 }
