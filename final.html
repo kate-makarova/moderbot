@@ -246,19 +246,23 @@
             }
 
             if(textTop.length) {
-                sendDecorations = true;
                 const plate = generatePlate(id, textImg, textTop, textBottom);
                 document.querySelector('.pa-fld4-preview').innerHTML = plate;
                 data[4] = plate;
             }
+        } else {
+            document.querySelector('.pa-fld4-preview').innerHTML = '';
+            data[4] = '';
         }
 
         const backgroundImg = document.getElementById('moderbot-bg-img').value;
         if (backgroundImg.length) {
-            sendDecorations = true;
             const background = generateBackground(backgroundImg);
             document.querySelector('.pa-fld8-preview').innerHTML = background;
             data[8] = background;
+        } else {
+            document.querySelector('.pa-fld8-preview').innerHTML = '';
+            data[8] = '';
         }
 
         let iconText = document.getElementById('moderbot-icon-text').value;
@@ -275,11 +279,13 @@
             }
 
             if (iconImg.length && iconText.length) {
-                sendDecorations = true;
                 const icon = generateIcon(iconImg, iconText);
                 document.querySelector('.pa-fld7-preview').innerHTML = icon;
                 data[7] = icon;
             }
+        }else {
+            document.querySelector('.pa-fld7-preview').innerHTML = '';
+            data[7] = '';
         }
 
         if(!errors) {
@@ -288,11 +294,7 @@
     }
 
     function updateDecorations() {
-        if (sendDecorations) {
             callBot(data);
-        } else {
-            alert('You have not changed anything');
-        }
     }
 
     loadPreview();
