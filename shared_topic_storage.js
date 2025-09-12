@@ -66,9 +66,9 @@ class SharedTopicStorage {
 
     getData() {
         return {
-            postId: this.getPostId(),
-            postNumber: this.getPostNumber(),
-            data: this.getData()
+            postId: this.currentPostId,
+            postNumber: this.currentPostNumber,
+            data: this.data
         }
     }
 }
