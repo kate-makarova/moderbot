@@ -1,9 +1,10 @@
-<link rel="stylesheet" type="text/css" href="https://forumstatic.ru/files/0015/e5/b7/46268.css">
+<link rel="stylesheet" type="text/css" href="https://forumstatic.ru/files/0015/e5/b7/46268.css?v=3">
 <style>
     #moderbot-profile-update-button[disabled],
     #moderbot-profile-update-decorations-button[disabled] {
         background: grey!important;
     }
+    #update-message-work-decorations {display: block}
 </style>
 
 <div id="moderbot-profile-update-wrapper">
@@ -12,7 +13,7 @@
         <h5 class="moderbot-profile-update-preview-title">предпросмотр профиля</h5>
         <div class="post-author-preview">
             <ul>
-                <li class="pa-fld7-preview"><div class="personal_icon"><img src="https://forumstatic.ru/files/001c/11/e3/50665.gif" original-title="Я часто вижу страх в смотрящих на меня глазах"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
+                <li class="pa-fld7-preview"><div class="personal_icon"><img src="https://forumstatic.ru/files/001c/11/e3/50665.gif" title="Я часто вижу страх в смотрящих на меня глазах"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
                 <li class="pa-author-preview"></li>
                 <li class="pa-title-preview"></li>
                 <li class="pa-avatar-preview"><span class="indOnline-preview">online</span><img src=""></li>
@@ -65,6 +66,7 @@
                         <div class="moderbot-profile-update-form__box">
                             <h5 class="moderbot-profile-update-form__box-title">Установка плашки</h5>
                             <div class="moderbot-profile-update-form__box-content">
+                                <input type="hidden" id="moderbot-batter-text-id" />
                                 <input type="text" id="moderbot-batter-text-top" class="moderbot-profile-update-fld input-banner-text-top" placeholder="Верхний текст плашки">
                                 <input type="text" id="moderbot-batter-text-bottom" class="moderbot-profile-update-fld input-banner-text-bottom" placeholder="Нижкий текст плашки">
                                 <input type="text" id="moderbot-batter-text-img" class="moderbot-profile-update-fld input-banner-img" placeholder="Ссылка на картинку">
@@ -106,13 +108,13 @@
 
 <!-- для вкладок скрипт -->
 <script>
-    let botLogId = 'moderbot-log';
+    window.botLogId = 'moderbot-log';
     document.addEventListener("DOMContentLoaded", function () {
         $(".moderbot-profile-update-form__container-tab").on("click", function () {
             const container = $(this).closest('.moderbot-profile-update-form__container');
 
             const target = $(this).attr("tab-name");
-            botLogId = $(this).data("logId");
+            window.botLogId = $(this).attr("data-logId");
 
             container.find(".moderbot-profile-update-form__container-tab").removeClass("active");
             $(this).addClass("active");
@@ -136,6 +138,53 @@
         document.querySelector('.pa-author-preview').innerText = UserLogin;
         document.querySelector('.pa-title-preview').innerText = UserTitle;
         document.querySelector('.pa-avatar-preview img').setAttribute('src', UserAvatar);
+
+        if (typeof UserFld1 != 'undefined') {
+            const profile = decodeEscaping(UserFld1);
+            document.querySelector('.pa-fld1-preview').innerHTML = profile;
+        }
+
+        if (typeof UserFld2 != 'undefined') {
+            const charName = decodeEscaping(UserFld2);
+            document.getElementById('moderbot-profile-update-message').value = charName;
+            document.querySelector('.pa-fld2-preview').innerHTML = charName;
+        }
+
+        if (typeof UserFld4 != 'undefined') {
+            const oldPlate = decodeEscaping(UserFld4);
+            const id = oldPlate.match(/a id="([^"]*)"/)[1];
+            const textTop =  oldPlate.match(/<b>([^>]*)<\/b>/)[1];
+            const textBottom =  oldPlate.match(/<em>([^>]*)<\/em>/)[1];
+            const textImg = oldPlate.match(/url\(([^)]*)\)/)[1];
+            document.getElementById('moderbot-batter-text-id').value = id;
+            document.getElementById('moderbot-batter-text-top').value = textTop;
+            document.getElementById('moderbot-batter-text-bottom').value = textBottom;
+            document.getElementById('moderbot-batter-text-img').value = textImg;
+            document.querySelector('.pa-fld4-preview').innerHTML = generatePlate(id, textImg, textTop, textBottom);
+        }
+
+        if (typeof UserFld8 != 'undefined') {
+            const oldBackground = decodeEscaping(UserFld8);
+            const backgroundImage = oldBackground.match(/src="([^"]*)"/)[1];
+            document.getElementById('moderbot-bg-img').value = backgroundImage;
+            document.querySelector('.pa-fld8-preview').innerHTML = generateBackground(backgroundImage);
+        }
+
+        if (typeof UserFld7 != 'undefined') {
+            oldIcon = decodeEscaping(UserFld7);
+            const iconText =  oldIcon.match(/title="([^"]*)"/)[1];
+            const iconImg = oldIcon.match(/src="([^"]*)"/)[1];
+            document.getElementById('moderbot-icon-text').value = iconText;
+            document.getElementById('moderbot-icon-img').value = iconImg;
+            document.querySelector('.pa-fld7-preview').innerHTML = generateIcon(iconImg, iconText);
+
+        }
+    }
+
+    function decodeEscaping(escaped) {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = escaped;
+        return txt.value;
     }
 
     function check() {
@@ -160,33 +209,40 @@
         }
     }
 
+    function generatePlate(id, textImg, textTop, textBottom) {
+        return '<a id="' + id + '" class="modal-link" href="#" data-reveal-id="character"><div class="p_plash" style="background: url(' + textImg + ')"><b>' + textTop + '</b><em>' + textBottom + '</em></div></a>';
+    }
+
+    function generateBackground(backgroundImg) {
+        return '<div class="personal_bg"><img src="'+backgroundImg+'"></div>';
+    }
+
+    function generateIcon(iconImg, iconText) {
+        return '<div class="personal_icon"><img src="' + iconImg + '" title="' + iconText + '"></div>';
+    }
+
     function checkDecorations() {
+        let id = document.getElementById('moderbot-batter-text-id').value;
         let textTop = document.getElementById('moderbot-batter-text-top').value;
         let textBottom = document.getElementById('moderbot-batter-text-bottom').value;
         let textImg = document.getElementById('moderbot-batter-text-img').value;
-        if (textTop.length || textBottom.length || textImg.length) {
-            let oldBackground = '<a id=""><b></b><em></em>url()';
-            if (typeof UserFld8 != 'undefined') {
-                oldBackground = UserFld8;
-            }
-            const id = oldBackground.match(/a id="([^"]*)"/)[1];
-            textTop = textTop.length? textTop : oldBackground.match(/<b>([^>]*)<\/b>/)[1];
-            textBottom = textBottom.length? textBottom : oldBackground.match(/<em>([^>]*)<\/em>/)[1];
-            textImg = textImg.length? textImg : oldBackground.match(/url\(([^)]*)\)/)[1];
+        let errors = false;
 
+        if (textTop.length || textBottom.length || textImg.length) {
             if(!textTop.length) {
                 document.getElementById('moderbot-batter-text-top').classList.add('error');
+                errors = true;
             }
             if(!textBottom.length) {
-                document.getElementById('moderbot-batter-text-bottom').classList.add('error');
+                document.getElementById('moderbot-batter-text-bottom').classList.add('warning');
             }
             if(!textImg.length) {
-                document.getElementById('moderbot-batter-text-img').classList.add('error');
+                document.getElementById('moderbot-batter-text-img').classList.add('warning');
             }
 
-            if(textTop.length && textBottom.length && textImg.length) {
+            if(textTop.length) {
                 sendDecorations = true;
-                const plate = '<a id="' + id + '" class="modal-link" href="#" data-reveal-id="character"><div class="p_plash" style="background: url(' + textImg + ')"><b>' + textTop + '</b><em>' + textBottom + '</em></div></a>';
+                const plate = generatePlate(id, textImg, textTop, textBottom);
                 document.querySelector('.pa-fld4-preview').innerHTML = plate;
                 data[4] = plate;
             }
@@ -195,7 +251,7 @@
         const backgroundImg = document.getElementById('moderbot-bg-img').value;
         if (backgroundImg.length) {
             sendDecorations = true;
-            const background = '<div class="personal_bg"><img src="'+backgroundImg+'"></div>';
+            const background = generateBackground(backgroundImg);
             document.querySelector('.pa-fld8-preview').innerHTML = background;
             data[8] = background;
         }
@@ -203,29 +259,27 @@
         let iconText = document.getElementById('moderbot-icon-text').value;
         let iconImg = document.getElementById('moderbot-icon-img').value;
         if (iconText.length || iconImg.length) {
-            let oldIcon = 'title=""src=""';
-            if (typeof UserFld7 != 'undefined') {
-                oldIcon = UserFld7;
-            }
-            iconText = iconText.length ? iconText : oldIcon.match(/title="([^"]*)"/)[1]
-            iconImg = iconImg.length ? iconImg : oldIcon.match(/src="([^*]*)"/)[1]
 
             if(!iconText.length) {
                 document.getElementById('moderbot-icon-text').classList.add('error');
+                errors = true;
             }
             if(!iconImg.length) {
                 document.getElementById('moderbot-icon-img').classList.add('error');
+                errors = true;
             }
 
             if (iconImg.length && iconText.length) {
                 sendDecorations = true;
-                const icon = '<div class="personal_icon"><img src="' + iconImg + '" original-title="' + iconText + '"></div>'
+                const icon = generateIcon(iconImg, iconText);
                 document.querySelector('.pa-fld7-preview').innerHTML = icon;
                 data[7] = icon;
             }
         }
 
-        document.getElementById('moderbot-profile-update-button').disabled = false;
+        if(!errors) {
+            document.getElementById('moderbot-profile-update-decorations-button').disabled = false;
+        }
     }
 
     function updateDecorations() {
@@ -270,7 +324,6 @@
             const categoryList = document.createElement('ul');
             categoryList.className = 'icons-gallery_list';
             icons[category].forEach(icon => {
-                const listItem = document.createElement('li');
                 categoryList.innerHTML += `<li onclick="pickIcon('${icon}', this)"><img src="${icon}"/></li>`;
             })
             iconsContainer.appendChild(categoryList);
@@ -318,7 +371,7 @@
     };
 
     function log(message) {
-        document.getElementById(botLogId).innerHTML += '<li>'+message+'</li>';
+        document.getElementById(window.botLogId).innerHTML += '<li>'+message+'</li>';
     }
 
     function callBot(data) {
