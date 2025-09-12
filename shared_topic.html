@@ -1,0 +1,45 @@
+<html>
+<head></head>
+<body>
+
+
+<iframe></iframe>
+
+<script>
+    sharedStorages = {}
+    // Listen for messages from iframe
+    window.addEventListener("message", function(event) {
+        if (event.data.type === "load_shared_storage") {
+            const topicId = event.data.payload.topicId;
+            sharedStorages[topicId] = new SharedTopicStorage(topicId);
+            sharedStorages[topicId].loadData().then(() => {
+                let response = sharedStorages[topicId].getData();
+                event.source.postMessage(
+                    {
+                        type: "load_shared_storage_response",
+                        payload: response
+                    }
+                );
+            })
+        }
+
+        if(event.data.type === "save_shared_storage") {
+            const topicId = event.data.payload.topicId;
+            if (!sharedStorages[topicId]) {
+                console.log('Wrong shared storage');
+                return;
+            }
+            sharedStorages[topicId].saveData(event.data.payload.data).then(() => {
+                let response = sharedStorages[topicId].getData();
+                event.source.postMessage(
+                    {
+                        type: "save_shared_storage_response",
+                        payload: response
+                    }
+                );
+            })
+        }
+    });
+</script>
+</body>
+</html>

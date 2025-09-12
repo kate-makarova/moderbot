@@ -38,11 +38,11 @@ class SharedTopicStorage {
     async saveData(data) {
         const oldPostId = this.currentPostId;
         const frame = document.createElement('iframe');
-        frame.src = '/api.php?';
+        frame.src = '/viewtopic.php?id='+this.topicId;
         frame.style.display = 'none';
         frame.onload = () => {
-            frame.contentWindow.document.getElementById('post').value = data;
-            frame.contentWindow.document.getElementById('submit').click();
+            frame.contentWindow.document.getElementById('main-reply').value = data;
+            frame.contentWindow.document.querySelector('form#post [name=submit]').click();
         }
         document.body.appendChild(frame);
 
@@ -65,15 +65,10 @@ class SharedTopicStorage {
     }
 
     getData() {
-        return this.data;
-    }
-
-    showLimitWarning() {
-        const postsLeft = PostLimit - this.currentPostNumber;
-        if (postsLeft < 10) {
-            return `<span style="color: red;">Warning: This topic is near the limit. You have ${postsLeft} posts left</span>`
-        } else {
-            return '';
+        return {
+            postId: this.getPostId(),
+            postNumber: this.getPostNumber(),
+            data: this.getData()
         }
     }
 }
