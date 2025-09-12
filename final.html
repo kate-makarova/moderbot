@@ -19,7 +19,7 @@
                 <li class="pa-avatar-preview"><span class="indOnline-preview">online</span><img src=""></li>
                 <li class="pa-fld1-preview"><a href="https://crossfeeling.rusff.me/viewtopic.php?id=8663">ИМЯ ПЕРСОНАЖА</a></li>
                 <li class="pa-fld2-preview">--Ваш ЛЗ--</li>
-                <li class="pa-fld6-preview">sanctuary</li>
+                <li class="pa-fld6-preview">фандом</li>
                 <li class="pa-fld4-preview"><div class="p_plash" style="background: url(https://forumstatic.ru/files/001c/11/e3/98596.png?v=1)"><b>Верхний текст плашки</b><em>Нижний текст плашки</em></div></li>
             </ul>
             <li class="pa-fld8-preview"><div class="personal_bg"><img src="https://forumstatic.ru/files/001c/11/e3/98596.png?v=1"></div></li> <!-- у кого то может не стоять, соответственно если фона у пользователя нет - это поле тоже вырублено будет -->
@@ -140,14 +140,19 @@
         document.querySelector('.pa-avatar-preview img').setAttribute('src', UserAvatar);
 
         if (typeof UserFld1 != 'undefined') {
-            const profile = decodeEscaping(UserFld1);
-            document.querySelector('.pa-fld1-preview').innerHTML = profile;
+            const charName = decodeEscaping(UserFld1);
+            document.querySelector('.pa-fld1-preview').innerHTML = charName;
         }
 
         if (typeof UserFld2 != 'undefined') {
-            const charName = decodeEscaping(UserFld2);
-            document.getElementById('moderbot-profile-update-message').value = charName;
-            document.querySelector('.pa-fld2-preview').innerHTML = charName;
+            const profile = decodeEscaping(UserFld2);
+            document.getElementById('moderbot-profile-update-message').value = profile;
+            document.querySelector('.pa-fld2-preview').innerHTML = profile;
+        }
+
+        if (typeof UserFld6 != 'undefined') {
+            const fandom = decodeEscaping(UserFld6);
+            document.querySelector('.pa-fld6-preview').innerHTML = fandom;
         }
 
         if (typeof UserFld4 != 'undefined') {
