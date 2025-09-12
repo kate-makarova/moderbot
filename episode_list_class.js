@@ -37,48 +37,50 @@ class EpisodeList {
     }
 
     editEpisode(category, topic_id) {
-        let episode = this.episodeTree[category].find(ep => ep.topic_id === topic_id);
-        if (!episode) {
-            episode = new Episode(null, category, true);
-        }
+        const episode = this.episodeTree[category].find(ep => ep.topic_id === topic_id);
         const form = this.renderEditEpisodeForm(episode);
 
-        // Remove existing modal if any
+        // Remove the existing modal if present
         const oldModal = document.getElementById('episode_modal');
         if (oldModal) oldModal.remove();
 
-        // Create modal elements
+        // Modal overlay (fills iframe only)
         const modal = document.createElement('div');
         modal.id = 'episode_modal';
         modal.className = 'modal';
-        modal.style.cssText = `
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    `;
+        Object.assign(modal.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: '9999',
+        });
 
+        // Modal content box
         const modalContent = document.createElement('div');
         modalContent.className = 'modal-content';
-        modalContent.style.cssText = `
-        background: #fff;
-        padding: 20px;
-        max-width: 600px;
-        width: 90%;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    `;
+        Object.assign(modalContent.style, {
+            background: '#fff',
+            padding: '20px',
+            maxWidth: '600px',
+            width: '90%',
+            borderRadius: '8px',
+            boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+            position: 'relative',
+        });
 
+        // Footer with close button
         const modalFooter = document.createElement('div');
         modalFooter.className = 'modal-footer';
-        modalFooter.style.cssText = `
-        margin-top: 10px;
-        text-align: right;
-    `;
+        Object.assign(modalFooter.style, {
+            marginTop: '10px',
+            textAlign: 'right',
+        });
 
         const closeBtn = document.createElement('button');
         closeBtn.textContent = 'Close';
@@ -89,12 +91,12 @@ class EpisodeList {
         modalContent.appendChild(modalFooter);
         modal.appendChild(modalContent);
 
-        // Close modal on outside click
+        // Close on the background click
         modal.onclick = (event) => {
             if (event.target === modal) modal.remove();
         };
 
-        // Append modal to body
+        // Append to iframe body (not parent)
         document.body.appendChild(modal);
     }
 
@@ -178,16 +180,58 @@ class SharedTopicStorageClient {
     constructor(topicId) {
         this.topicId = topicId;
         this.data = '{}';
+        this.loadPromise = null;
+        this._bindMessageListener();
+    }
+
+    _bindMessageListener() {
+        window.addEventListener('message', (event) => {
+            const { type, payload } = event.data || {};
+
+            if (type === 'shared_storage_load_response' && this.loadPromise) {
+                this.data = payload;
+                this.loadPromise.resolve(); // externally resolve
+                this.loadPromise = null; // clear after resolving
+            }
+        });
     }
 
     async loadData() {
-        // Mock: Load from localStorage or server
-        this.data = localStorage.getItem(`topic_${this.topicId}`) || '{}';
+        if (this.loadPromise) {
+            return this.loadPromise.promise; // already waiting
+        }
+
+        // Create an externally resolvable promise
+        this.loadPromise = {};
+        this.loadPromise.promise = new Promise((resolve, reject) => {
+            this.loadPromise.resolve = resolve;
+            this.loadPromise.reject = reject;
+
+            // Optional: add timeout for safety
+            setTimeout(() => {
+                if (this.loadPromise) {
+                    this.loadPromise.reject(new Error('Timeout waiting for shared_storage_load_response'));
+                    this.loadPromise = null;
+                }
+            }, 5000);
+        });
+
+        // Send request to parent
+        window.parent.postMessage({
+            type: 'shared_storage_load',
+            topic_id: this.topicId,
+        }, '*');
+
+        return this.loadPromise.promise;
     }
 
     async saveData(data) {
         this.data = data;
-        localStorage.setItem(`topic_${this.topicId}`, data);
+        window.parent.postMessage({
+            type: 'shared_storage_save',
+            topic_id: this.topicId,
+            payload: data
+        }, '*');
     }
 
     getData() {
