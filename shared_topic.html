@@ -5,6 +5,7 @@
 
 <iframe>
     <div id="test"></div>
+    <button onclick="save(6)">Save</button>
     <script>
         function triggerParentFunction(topicId) {
             window.parent.postMessage(
@@ -16,11 +17,24 @@
             );
         }
 
+        function save(topicId) {
+            window.parent.postMessage(
+                {
+                    type: "save_shared_storage",
+                    payload: {
+                        topicId: topicId,
+                        data: 'something'
+                    },
+                },
+                "*"
+            );
+        }
+
         // Listen for responses from parent
         window.addEventListener("message", function(event) {
 
             console.log(event.data);
-            if (event.data.type === "load_shared_storage_response") {
+            if (event.data.type === "load_shared_storage_response" || event.data.type === "save_shared_storage_data") {
                 document.getElementById('test').innerHTML = event.data.payload.data;
             }
         });

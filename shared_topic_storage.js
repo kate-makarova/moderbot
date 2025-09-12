@@ -11,11 +11,13 @@ class SharedTopicStorage {
     }
 
     async loadData() {
-        const postData = await fetch('/api.php?topic+id='+this.topicId).then(response => response.json());
+        let postData = await fetch('/api.php?method=post.get&topic_id='+this.topicId+'&sort_by=id&sort_dir=desc&limit=1').then(response => response.json());
+        postData = postData.response[0];
         this.currentPostId = postData.id;
         this.currentPostNumber = postData.number;
         this.data = postData.message;
     }
+
 
     delay(ms) {
         return new Promise((resolve) => {
@@ -23,7 +25,7 @@ class SharedTopicStorage {
         });
     }
 
-    async waitForNewPost(oldPostId, timeout = 5000) {
+    async waitForNewPost(oldPostId, timeout = 50000) {
         const start = Date.now();
         while (Date.now() - start < timeout) {
             await this.delay(500);
@@ -40,8 +42,11 @@ class SharedTopicStorage {
         const frame = document.createElement('iframe');
         frame.src = '/viewtopic.php?id='+this.topicId;
         frame.style.display = 'none';
+        // frame.style.height = '500px';
+        // frame.style.width = '500px';
         frame.onload = () => {
             frame.contentWindow.document.getElementById('main-reply').value = data;
+            process_form(frame.contentWindow.document.getElementById('post'));
             frame.contentWindow.document.querySelector('form#post [name=submit]').click();
         }
         document.body.appendChild(frame);
@@ -56,14 +61,6 @@ class SharedTopicStorage {
         return true;
     }
 
-    getPostNumber() {
-        return this.currentPostNumber;
-    }
-
-    getPostId() {
-        return this.currentPostId;
-    }
-
     getData() {
         return {
             postId: this.currentPostId,
@@ -72,3 +69,38 @@ class SharedTopicStorage {
         }
     }
 }
+
+sharedStorages = {}
+// Listen for messages from iframe
+window.addEventListener("message", function(event) {
+    if (event.data.type === "load_shared_storage") {
+        const topicId = event.data.payload.topicId;
+        sharedStorages[topicId] = new SharedTopicStorage(topicId);
+        sharedStorages[topicId].loadData().then(() => {
+            let response = sharedStorages[topicId].getData();
+            event.source.postMessage(
+                {
+                    type: "load_shared_storage_response",
+                    payload: response
+                }, event.origin
+            );
+        })
+    }
+
+    if(event.data.type === "save_shared_storage") {
+        const topicId = event.data.payload.topicId;
+        if (!sharedStorages[topicId]) {
+            console.log('Wrong shared storage');
+            return;
+        }
+        sharedStorages[topicId].saveData(event.data.payload.data).then(() => {
+            let response = sharedStorages[topicId].getData();
+            event.source.postMessage(
+                {
+                    type: "save_shared_storage_response",
+                    payload: response
+                }, event.origin
+            );
+        })
+    }
+});
